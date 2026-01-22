@@ -21,8 +21,18 @@ def product_list(request):
         else:
             return Response(serializer.errors)
 
-@api_view()
+@api_view(['GET','PUT'])
 def product_details(request,pk):
-    product = Product.objects.get(pk=pk)
-    serializer = ProductSerializer(product)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        product = Product.objects.get(pk=pk)
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
+    
+    if request.method == 'PUT':
+        product = Product.objects.get(pk=pk)
+        serializer = ProductSerializer(product,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
