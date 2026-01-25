@@ -24,7 +24,11 @@ def product_list(request):
 @api_view(['GET','PUT'])
 def product_details(request,pk):
     if request.method == 'GET':
-        product = Product.objects.get(pk=pk)
+        try:
+            product = Product.objects.get(pk=pk)
+        except Product.DoesNotExist:
+            return Response({'Error': 'Product not found'})
+    
         serializer = ProductSerializer(product)
         return Response(serializer.data)
     
@@ -32,7 +36,7 @@ def product_details(request,pk):
         product = Product.objects.get(pk=pk)
         serializer = ProductSerializer(product,data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save()  
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
