@@ -2,16 +2,18 @@ from rest_framework import serializers
 from .models import Product
 from rest_framework.validators import UniqueValidator
 from categories.models import Category
+from comments.serializers import CommentSerializer
 import re
 
 class ProductSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(max_length=200)
-    description = serializers.CharField(required=False,allow_blank=True,allow_null=True) 
-    price = serializers.DecimalField(max_digits=10,decimal_places=2)
-    stock = serializers.IntegerField()
-    slug= serializers.SlugField(validators =[UniqueValidator(queryset=Product.objects.all())])
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    comments = CommentSerializer(many=True,read_only=True)
+    name = serializers.CharField(max_length=200, validators = [UniqueValidator(queryset=Product.objects.all())])
+    slug = serializers.CharField(validators= [UniqueValidator(queryset=Product.objects.all())])
+
+    class Meta:
+        model = Product
+        fields = ['id','name','description','price','stock','slug','category','comments']
+    
 
     def validate_name(self,value):
         if len(value.strip()) < 3:
@@ -36,14 +38,3 @@ class ProductSerializer(serializers.Serializer):
         return value
         
     
-
-    def create(self, validated_data):
-        return Product.objects.create(**validated_data)
-    
-    def update(self,instance,validated_data):
-        instance.name = validated_data.get('name',instance.name)
-        instance.description = validated_data.get('description',instance.description)
-        instance.price = validated_data.get('price',instance.price)
-        instance.stock = validated_data.get('stock',instance.stock) 
-        instance.save()
-        return instance
