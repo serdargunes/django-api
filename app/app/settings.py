@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'products',
     'categories',
     'comments',
+    'users',
     'rest_framework'
     
 ]
